@@ -67,7 +67,8 @@ export const executeAction: Action = {
       }
 
       callback({
-        text: responseText
+        text: responseText,
+        action: "EXECUTE_BLESS"
       });
   
       return true;
@@ -75,7 +76,8 @@ export const executeAction: Action = {
       console.error("Error executing Bless function:", error);
       
       callback({
-        text: `Failed to execute function on the Bless Network: ${error.message || "Unknown error"}`
+        text: `Failed to execute function on the Bless Network: ${error.message || "Unknown error"}`,
+        action: "EXECUTE_BLESS"
       });
       
       return false;
@@ -103,11 +105,11 @@ export const executeAction: Action = {
       {
           user: "{{user1}}",
           content: {
-              text: "Run this function on bless network",
+              text: "Run this function on bless network: {{functionId}}",
           },
       },
       {
-          user: "{{agent}}",
+          user: "{{user2}}",
           content: { text: "Sure, I'll run it on the bless network", action: "EXECUTE_BLESS" },
       }
     ],
