@@ -1,33 +1,65 @@
-export async function executeBless() {
-const fetchOptions = {
-      method: 'POST',
-      body: JSON.stringify({
-        "function_id": "bafybeifexr5igblzhv5pyixvbif5lmrznv7yxvplcgnau6u2jzvzrji3i4",
-        "method": "blessnet.wasm",
-        "config": {
-          "permissions": [],
-          "stdin": "{\"path\":\"/\",\"method\":\"GET\"}",
-          "env_vars": [
-            {
-              "name": "BLS_REQUEST_PATH",
-              "value": "/"
-            }
-          ],
-          "number_of_nodes": 3
-        }
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
+export interface BlessExecuteOptions {
+  functionId: string;
+  method?: string;
+  path?: string;
+  httpMethod?: string;
+  numberOfNodes?: number;
+  envVars?: Array<{ name: string; value: string }>;
+  permissions?: string[];
+}
 
-    console.log("BLESSSSSS executeAction");
+export async function executeBless({
+  functionId,
+  method = "blessnet.wasm",
+  path = "/",
+  httpMethod = "GET",
+  numberOfNodes = 1,
+  envVars = [],
+  permissions = []
+}: BlessExecuteOptions) {
+  const headNodeAddress = 'https://head-run-5.bls.dev';
+  
+  // Ensure BLS_REQUEST_PATH is included in envVars
+  const allEnvVars = [
+    ...envVars,
+    // Only add default path env var if not already present
+    ...(!envVars.some(env => env.name === "BLS_REQUEST_PATH") 
+      ? [{ name: "BLS_REQUEST_PATH", value: path }] 
+      : [])
+  ];
+
+  const fetchOptions = {
+    method: 'POST',
+    body: JSON.stringify({
+      "function_id": functionId,
+      "method": method,
+      "config": {
+        "permissions": permissions,
+        "stdin": JSON.stringify({ path, method: httpMethod }),
+        "env_vars": allEnvVars,
+        "number_of_nodes": numberOfNodes
+      }
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+
+  console.log("Executing Bless function");
+  
+  try {
+    console.log("url", `${headNodeAddress}/api/v1/functions/execute`);
+    const response = await fetch(`${headNodeAddress}/api/v1/functions/execute`, fetchOptions);
     
-    const response = await fetch('https://head-run-5.bls.dev/api/v1/functions/execute', fetchOptions)
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
 
     const data = await response.json();
-
-    console.log("BLESSSSSS executeAction", data);
-
+    console.log("Bless function execution result:", data);
     return data;
+  } catch (error) {
+    console.error("Error executing Bless function:", error);
+    throw error;
+  }
 }
