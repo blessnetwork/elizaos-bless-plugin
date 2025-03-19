@@ -39,7 +39,7 @@ export const executeAction: Action = {
       };
 
       // Log execution attempt for debugging
-      elizaLogger.info(`Executing Bless function: ${functionId}, method: ${method}`);
+      elizaLogger.info(`Executing Bless function: ${functionId}, method: ${method || "blessnet.wasm"}`);
       
       const data = await executeBless(params);
 

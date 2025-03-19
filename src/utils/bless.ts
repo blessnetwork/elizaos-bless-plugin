@@ -31,7 +31,7 @@ export async function executeBless({
     method: 'POST',
     body: JSON.stringify({
       "function_id": functionId,
-      "method": method,
+      "method": method || "blessnet.wasm",
       "config": {
         "permissions": permissions,
         "stdin": JSON.stringify({ path, method: httpMethod }),
