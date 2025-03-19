@@ -10,7 +10,7 @@ export interface BlessExecuteOptions {
 }
 
 export async function executeBless({
-  headNodeAddress = "https://head-run.bls.dev",
+  headNodeAddress = "https://head-run-5.bls.dev",
   functionId,
   method = "blessnet.wasm",
   path = "/",
@@ -43,11 +43,8 @@ export async function executeBless({
       'Content-Type': 'application/json'
     }
   };
-
-  console.log("Executing Bless function");
   
   try {
-    console.log("url", `${headNodeAddress}/api/v1/functions/execute`);
     const response = await fetch(`${headNodeAddress}/api/v1/functions/execute`, fetchOptions);
     
     if (!response.ok) {
@@ -55,10 +52,8 @@ export async function executeBless({
     }
 
     const data = await response.json();
-    console.log("Bless function execution result:", data);
     return data;
   } catch (error) {
-    console.error("Error executing Bless function:", error);
     throw error;
   }
 }

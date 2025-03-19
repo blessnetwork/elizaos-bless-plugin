@@ -1,5 +1,5 @@
 import { Action, ActionExample, elizaLogger, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core"
-import { executeBless } from "../utils/bless"
+import { BlessExecuteOptions, executeBless } from "../utils/bless"
 
 export const executeAction: Action = {
   name: "EXECUTE_BLESS",
@@ -29,14 +29,18 @@ export const executeAction: Action = {
       }
 
       // Extract additional parameters if needed
+      const headNodeAddress = runtime.getSetting("BLESS_HEAD_NODE_ADDRESS");
       const params = {
         functionId,
         method,
         path: "/",
         httpMethod: "GET",
-        numberOfNodes: 1,
-        headNodeAddress: runtime.getSetting("BLESS_HEAD_NODE_ADDRESS")
-      };
+        numberOfNodes: 1
+      } as BlessExecuteOptions;
+      
+      if (headNodeAddress) {
+        params.headNodeAddress = headNodeAddress;
+      }
 
       // Log execution attempt for debugging
       elizaLogger.info(`Executing Bless function: ${functionId}, method: ${method || "blessnet.wasm"}`);
