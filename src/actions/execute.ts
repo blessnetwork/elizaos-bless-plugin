@@ -1,26 +1,24 @@
-import { Action, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core"
+import { Action, ActionExample, elizaLogger, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core"
 import { executeBless } from "../utils/bless"
 
 export const executeAction: Action = {
   name: "EXECUTE_BLESS",
   description: "Execute a function on the Bless Network",
-  similes: ["RUN_BLESS", "CALL_BLESS", "INVOKE_BLESS"],
+  similes: ["RUN_FUNCTION", "EXECUTE_ON_BLESS", "RUN_ON_BLESS", "CALL_ON_BLESS", "INVOKE_ON_BLESS"],
   suppressInitialMessage: true,
   handler: async (runtime: IAgentRuntime, message: Memory, state: State, options, callback: HandlerCallback) => {
     try {
       // Extract functionId from the message
-      let functionId = "lol"; // Default value
+      let functionId;
       
       // Look for a functionId pattern in the message (IPFS CID format)
       const functionIdMatch = message.content.text.match(/\b(bafy[a-zA-Z0-9]{50,})\b/);
       if (functionIdMatch && functionIdMatch[1]) {
         functionId = functionIdMatch[1];
       }
-
-      console.log("functionId?", functionId);
       
       // Extract method from the message, default to "blessnet.wasm"
-      let method = "blessnet.wasm";
+      let method;
       
       // Check if a specific method is mentioned
       if (message.content.text.toLowerCase().includes("method:")) {
@@ -36,11 +34,12 @@ export const executeAction: Action = {
         method,
         path: "/",
         httpMethod: "GET",
-        numberOfNodes: 1
+        numberOfNodes: 1,
+        headNodeAddress: runtime.getSetting("BLESS_HEAD_NODE_ADDRESS")
       };
 
       // Log execution attempt for debugging
-      console.log(`Executing Bless function: ${functionId}, method: ${method}`);
+      elizaLogger.info(`Executing Bless function: ${functionId}, method: ${method}`);
       
       const data = await executeBless(params);
 
@@ -73,8 +72,7 @@ export const executeAction: Action = {
   
       return true;
     } catch (error) {
-      console.error("Error executing Bless function:", error);
-      
+      elizaLogger.error("Error executing Bless function:", error);
       callback({
         text: `Failed to execute function on the Bless Network: ${error.message || "Unknown error"}`,
         action: "EXECUTE_BLESS"
@@ -84,6 +82,8 @@ export const executeAction: Action = {
     }
   },
   validate: async (runtime: IAgentRuntime, message: Memory) => {
+    elizaLogger.info("Validating bless execution");
+
     const keywords = [
       "bless",
       "blessnetwork",
@@ -94,7 +94,7 @@ export const executeAction: Action = {
     const messageText = message.content.text.toLowerCase();
     
     if (keywords.some((keyword) => messageText.includes(keyword))) {
-      console.log("Bless execution validated for:", message.content.text);
+      elizaLogger.info("Bless execution validated for:", message.content.text);
       return true;
     }
 
@@ -105,13 +105,13 @@ export const executeAction: Action = {
       {
           user: "{{user1}}",
           content: {
-              text: "Run this function on bless network: {{functionId}}",
+              text: "Run this function on the bless network",
           },
       },
       {
-          user: "{{user2}}",
+          user: "{{agent}}",
           content: { text: "Sure, I'll run it on the bless network", action: "EXECUTE_BLESS" },
       }
     ],
-  ],
-};
+  ] as ActionExample[][],
+} as Action;
