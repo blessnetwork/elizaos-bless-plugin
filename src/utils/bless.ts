@@ -1,4 +1,5 @@
 export interface BlessExecuteOptions {
+  headNodeAddress?: string;
   functionId: string;
   method?: string;
   path?: string;
@@ -9,6 +10,7 @@ export interface BlessExecuteOptions {
 }
 
 export async function executeBless({
+  headNodeAddress = "https://head-run.bls.dev",
   functionId,
   method = "blessnet.wasm",
   path = "/",
@@ -17,12 +19,9 @@ export async function executeBless({
   envVars = [],
   permissions = []
 }: BlessExecuteOptions) {
-  const headNodeAddress = 'https://head-run-5.bls.dev';
-  
   // Ensure BLS_REQUEST_PATH is included in envVars
   const allEnvVars = [
     ...envVars,
-    // Only add default path env var if not already present
     ...(!envVars.some(env => env.name === "BLS_REQUEST_PATH") 
       ? [{ name: "BLS_REQUEST_PATH", value: path }] 
       : [])
