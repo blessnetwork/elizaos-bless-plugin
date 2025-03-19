@@ -48,10 +48,6 @@ pnpm run lint
 
 - @elizaos/core: workspace:\*
 
-## Contributing
-
-Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information.
-
 ## Credits
 
 Special thanks to:
